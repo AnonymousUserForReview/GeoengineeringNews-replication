@@ -1,0 +1,9 @@
+# Tested with Python 3.12
+numpy>=2.0,<3
+pandas>=2.3,<3
+pyarrow>=17
+statsmodels>=0.14
+matplotlib>=3.8
+scikit-learn>=1.4
+sentence-transformers>=3.0
+torch>=2.3

@@ -1,0 +1,29 @@
+## Data are never committed (see README: Data). Layout is kept with .gitkeep.
+data/**
+!data/**/.gitkeep
+analysis/06_token_audit/*.parquet
+analysis/06_token_audit/*.csv
+analysis/10_volume_vs_tone/climate_clean_tones.csv
+
+## Generated outputs
+analysis/08_rebuild/weekly_series_master.csv
+analysis/08_rebuild/*.json
+analysis/08_rebuild/loto_cleaned_equal.csv
+analysis/**/__pycache__/
+analysis/09_stats/**/*.csv
+analysis/09_stats/**/*.json
+analysis/09_stats/**/*.pdf
+analysis/09_stats/**/*.png
+analysis/10_volume_vs_tone/*.npz
+analysis/10_volume_vs_tone/nested_*.csv
+analysis/10_volume_vs_tone/*.json
+analysis/1[2-5]_*/**/*.csv
+analysis/1[2-5]_*/**/*.json
+analysis/1[2-5]_*/**/*.pdf
+analysis/1[2-5]_*/**/*.png
+manuscript/src/graphs-Round3/*
+!manuscript/src/graphs-Round3/.gitkeep
+manuscript/src/generated/*
+!manuscript/src/generated/.gitkeep
+__pycache__/
+.DS_Store

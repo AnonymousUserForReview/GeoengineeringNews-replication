@@ -1,0 +1,18 @@
+{
+  "_comment": "Headline values reported in the manuscript. Deterministic seeds are set in the scripts; tolerances in run_all.py --verify absorb BLAS/platform float differences.",
+  "pooled_h25": {
+    "energy_b": 2.836,
+    "energy_se": 0.556,
+    "adjR2": 0.3994,
+    "ci": [0.911, 3.624],
+    "rank1_share": 0.829
+  },
+  "lag_profile": {
+    "peak_r26": 0.4053,
+    "band_global": 0.3456
+  },
+  "verdicts": {
+    "n_clearing": 3,
+    "energy_first": 7
+  }
+}
