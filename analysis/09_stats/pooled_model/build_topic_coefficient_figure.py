@@ -1,4 +1,4 @@
-"""Build main-text Figure 4: topic-salience main effects under the corrected specification.
+"""Build main-text Figure 4: topic-coverage main effects under the corrected specification.
 
 The earlier version of this figure was drawn from coefficients estimated without
 the post-February-2022 regime indicator, so its energy estimate (3.27) did not
@@ -119,7 +119,7 @@ def main() -> None:
                 color="#1f3b73" if not is_energy else "#d95f02", zorder=4)
     ax.set_yticks(ys)
     ax.set_yticklabels([t.capitalize() for t in table["topic"]])
-    ax.set_xlabel("Standardized coefficient on topic salience, $h = 25$")
+    ax.set_xlabel("Standardized coefficient on topic coverage, $h = 25$")
     ax.set_title("Pooled dynamic topic model, corrected specification",
                  loc="left", fontweight="bold")
     handles = [
