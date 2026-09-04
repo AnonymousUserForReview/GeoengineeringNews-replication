@@ -168,6 +168,26 @@ def main() -> None:
         r = json.loads((ROOT / f"analysis/15_unambiguous_index/index_construction_robustness_h{h}.json").read_text())
         cons = r.get("constructions", r.get("results", []))
         idx[h] = {"first": r.get("energy_first_ranked_in"), "n": len(cons), "sig05": sum(c.get("energy_p", 1) < 0.05 for c in cons)}
+    # ---------- SI: vocabulary-overlap test by horizon ----------
+    lines = [r"\begin{tabular}{l" + "c" * len(H) + "}", r"\toprule",
+             "Index variant & " + " & ".join(f"$h={h}$" for h in H) + r" \\", r"\midrule"]
+    for name, v in lex["variants"].items():
+        cells = []
+        for h in H:
+            x = next(x for x in v["horizons"] if x["h"] == h)
+            s_ = f"{x['energy_b']:.2f}"
+            if x["energy_p"] < 0.01: s_ += r"\sym{***}"
+            elif x["energy_p"] < 0.05: s_ += r"\sym{**}"
+            elif x["energy_p"] < 0.10: s_ += r"\sym{*}"
+            s_ += f" ({x['energy_rank']})"
+            cells.append(s_)
+        share = f" ({100 * v['weight_share_of_primary']:.0f}\\% of weight)" if v.get("weight_share_of_primary") and v["weight_share_of_primary"] < 1 else ""
+        lines.append(f"{name}{share} & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule",
+              r"\multicolumn{" + str(len(H) + 1) + r"}{l}{\footnotesize Energy coefficient (HAC stars: \sym{*} $p<0.10$, \sym{**} $p<0.05$, \sym{***} $p<0.01$) and, in parentheses, energy's rank among the twelve topics.}\\",
+              r"\end{tabular}"]
+    (GEN / "si_lexical_band_table.tex").write_text("\n".join(lines) + "\n")
+
     numbers = {"summary": band["summary"], "topic_band": band["topic_band"],
                "by_horizon": [{k: v for k, v in r.items() if k != "ladder"} | {"ladder": r["ladder"]} for r in rows],
                "rL": {h: round(rL[h], 3) for h in H}, "clears": clears, "band_global": round(band_global, 3),
