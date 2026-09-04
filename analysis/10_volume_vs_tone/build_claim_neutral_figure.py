@@ -110,15 +110,10 @@ def main() -> None:
     peak = 26
     profile_axis.plot([peak], [rp[peak]], "o", color=pos_color, ms=4, zorder=4)
     profile_axis.plot([peak], [rn[peak]], "o", color=neg_color, ms=4, zorder=4)
-    profile_axis.annotate(
-        f"negative: r(26) = {rn[peak]:.2f}", xy=(peak, rn[peak]), xytext=(30, 0.47),
-        ha="left", va="bottom", fontsize=7.5, color=neg_color,
-        arrowprops={"arrowstyle": "-", "color": neg_color, "lw": 0.7},
-    )
-    profile_axis.annotate(
-        f"positive: r(26) = {rp[peak]:.2f}", xy=(peak, rp[peak]), xytext=(30, 0.42),
-        ha="left", va="bottom", fontsize=7.5, color=pos_color,
-        arrowprops={"arrowstyle": "-", "color": pos_color, "lw": 0.7},
+    profile_axis.text(
+        27.5, 0.47,
+        f"at L = 26:  negative-tone r = {rn[peak]:.2f},  positive-tone r = {rp[peak]:.2f}",
+        ha="left", va="bottom", fontsize=7.5, color="#333333",
     )
     profile_axis.set_ylim(-0.05, 0.55)
     profile_axis.set_ylabel(r"Correlation with search index, $r(L)$")
@@ -136,19 +131,17 @@ def main() -> None:
     for lead in clearing:
         difference_axis.axvspan(lead - 0.5, lead + 0.5, color="#4C78A8", alpha=0.13, zorder=0)
     difference_axis.plot([peak], [delta[peak]], "o", color="#333333", ms=4, zorder=4)
-    difference_axis.annotate(
-        f"$\\Delta r$(26) = {delta[peak]:.2f}, band [{lower[peak]:.2f}, {upper[peak]:+.2f}]",
-        xy=(peak, delta[peak]), xytext=(31, 0.11), ha="left", va="center",
-        fontsize=7.5, color="#333333",
-        arrowprops={"arrowstyle": "-", "color": "#777777", "lw": 0.7},
+    difference_axis.text(
+        27.5, 0.145,
+        f"at L = 26:  $\\Delta r$ = {delta[peak]:.2f}, band [{lower[peak]:.2f}, {upper[peak]:+.2f}]",
+        ha="left", va="center", fontsize=7.5, color="#333333",
     )
     gap = int(np.argmax(np.abs(delta)))
     difference_axis.plot([gap], [delta[gap]], "o", color="#333333", ms=4, zorder=4)
-    difference_axis.annotate(
-        f"largest gap: |$\\Delta r$| = {abs(delta[gap]):.2f} at L = {gap}",
-        xy=(gap, delta[gap]), xytext=(gap + 2.5, -0.185), ha="left", va="center",
-        fontsize=7.5, color="#333333",
-        arrowprops={"arrowstyle": "-", "color": "#777777", "lw": 0.7},
+    difference_axis.text(
+        gap + 1.5, delta[gap] - 0.01,
+        f"largest gap {abs(delta[gap]):.2f} at L = {gap}",
+        ha="left", va="top", fontsize=7.5, color="#333333",
     )
     difference_axis.set_ylim(-0.22, 0.17)
     difference_axis.set_ylabel(r"$\Delta r(L)$")
@@ -191,14 +184,10 @@ def main() -> None:
         markersize=5,
         zorder=5,
     )
-    rmse_axis.annotate(
+    rmse_axis.text(
+        benchmark_x - 0.05, shifted_high + 0.12,
         f"shifted-tone benchmark\n{shifted_mean:.2f} [{shifted_low:.1f}, {shifted_high:.1f}]",
-        xy=(benchmark_x, shifted_mean),
-        xytext=(1.35, 14.1),
-        arrowprops={"arrowstyle": "-", "color": "#555555"},
-        ha="center",
-        va="bottom",
-        fontsize=8,
+        ha="center", va="bottom", fontsize=7.5, color="#333333",
     )
     rmse_axis.set_xticks(positions, labels)
     rmse_axis.set_ylabel("Out-of-sample RMSE (lower is better)")

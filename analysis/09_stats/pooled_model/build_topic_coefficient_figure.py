@@ -123,16 +123,15 @@ def main() -> None:
     rank1 = float(spec["bootstrap_h25_cleaned"]["rank1_share"])
     for y, (_, r) in zip(ys, table.iterrows()):
         right = max(r["HAC_hi"], r["boot_hi"]) + 0.1
-        pval = "p < .0001" if r["p"] < 1e-4 else f"p = {r['p']:.3f}".replace("0.", ".")
         if r["topic"] == "energy":
-            label = (f"{r['coef']:.2f}  [{r['boot_lo']:.2f}, {r['boot_hi']:.2f}], {pval}\n"
-                     f"first-ranked in {100 * rank1:.1f}% of bootstrap resamples")
+            label = (f"{r['coef']:.2f}  [{r['boot_lo']:.2f}, {r['boot_hi']:.2f}]\n"
+                     f"first in {100 * rank1:.1f}% of bootstrap resamples")
             ax.text(right, y, label, va="center", ha="left", fontsize=7.5,
                     color="#b34700")
         else:
-            ax.text(right, y, f"{r['coef']:.2f}, {pval}", va="center", ha="left",
+            ax.text(right, y, f"{r['coef']:.2f}", va="center", ha="left",
                     fontsize=7.5, color="#333333")
-    ax.set_xlim(right=max(table["HAC_hi"].max(), table["boot_hi"].max()) + 2.4)
+    ax.set_xlim(right=max(table["HAC_hi"].max(), table["boot_hi"].max()) + 2.0)
     ax.set_yticks(ys)
     ax.set_yticklabels([t.capitalize() for t in table["topic"]])
     ax.set_xlabel("Standardized coefficient on topic coverage, $h = 25$ "
