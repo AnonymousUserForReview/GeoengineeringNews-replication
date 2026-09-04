@@ -68,8 +68,8 @@ def main() -> None:
     ax_a.axhspan(-band, band, color="#cccccc", alpha=0.35, zorder=0, lw=0)
     ax_a.axhline(band, color="#6f6f6f", lw=0.9, ls=(0, (4, 3)), zorder=2)
     ax_a.axhline(baseline, color="#333333", lw=1.0, ls=":", zorder=2)
-    ax_a.text(len(quarters) - 0.6, baseline + 0.008, f"full sample {baseline:.3f}",
-              ha="right", va="bottom", fontsize=7.5, color="#333333")
+    ax_a.text(-0.3, baseline + 0.008, f"full sample r(26) = {baseline:.3f}",
+              ha="left", va="bottom", fontsize=7.5, color="#333333")
     ax_a.text(len(quarters) - 0.6, band - 0.012, f"95% null band ±{band:.3f}",
               ha="right", va="top", fontsize=7.5, color="#6f6f6f")
     ax_a.scatter(range(len(quarters)), quarters["r"], c=colors, s=46,

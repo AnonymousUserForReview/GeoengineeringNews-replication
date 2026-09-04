@@ -117,9 +117,26 @@ def main() -> None:
                 color="#1f3b73" if not is_energy else "#d95f02", solid_capstyle="butt", zorder=3)
         ax.plot([r["coef"]], [y], "o", ms=5,
                 color="#1f3b73" if not is_energy else "#d95f02", zorder=4)
+    # print every estimate so the figure can be read without the table
+    import json as _json
+    spec = _json.loads((OUT / "corrected_final_spec.json").read_text())
+    rank1 = float(spec["bootstrap_h25_cleaned"]["rank1_share"])
+    for y, (_, r) in zip(ys, table.iterrows()):
+        right = max(r["HAC_hi"], r["boot_hi"]) + 0.1
+        pval = "p < .0001" if r["p"] < 1e-4 else f"p = {r['p']:.3f}".replace("0.", ".")
+        if r["topic"] == "energy":
+            label = (f"{r['coef']:.2f}  [{r['boot_lo']:.2f}, {r['boot_hi']:.2f}], {pval}\n"
+                     f"first-ranked in {100 * rank1:.1f}% of bootstrap resamples")
+            ax.text(right, y, label, va="center", ha="left", fontsize=7.5,
+                    color="#b34700")
+        else:
+            ax.text(right, y, f"{r['coef']:.2f}, {pval}", va="center", ha="left",
+                    fontsize=7.5, color="#333333")
+    ax.set_xlim(right=max(table["HAC_hi"].max(), table["boot_hi"].max()) + 2.4)
     ax.set_yticks(ys)
     ax.set_yticklabels([t.capitalize() for t in table["topic"]])
-    ax.set_xlabel("Standardized coefficient on topic coverage, $h = 25$")
+    ax.set_xlabel("Standardized coefficient on topic coverage, $h = 25$ "
+                  "(index points per one-SD change in coverage)")
     ax.set_title("Pooled dynamic topic model, corrected specification",
                  loc="left", fontweight="bold")
     handles = [
@@ -127,7 +144,8 @@ def main() -> None:
         plt.Line2D([], [], lw=2, color="#1f3b73", label="moving-block bootstrap 95% CI"),
         plt.Line2D([], [], lw=2, color="#d95f02", label="energy"),
     ]
-    ax.legend(handles=handles, frameon=False, fontsize=8, loc="lower right")
+    ax.legend(handles=handles, frameon=False, fontsize=8, loc="upper center",
+              bbox_to_anchor=(0.5, -0.13), ncol=3)
     fig.tight_layout()
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.pdf")
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.png", dpi=300)

@@ -64,22 +64,51 @@ def main() -> None:
     ax.axhline(0, color="black", lw=0.8, zorder=2)
     ax.axvline(0, color="#bbbbbb", lw=0.8, zorder=1)
 
+    # family-corrected threshold for the pre-specified 12-20-week window
+    window_thr = float(profile["band_secondary_12_20"].iloc[0])
+    ax.plot([12, 20], [window_thr, window_thr], color="#8a6d3b", lw=1.1,
+            ls=(0, (2, 2)), zorder=2)
+    ax.annotate(f"window threshold {window_thr:.3f}", xy=(13, window_thr),
+                xytext=(4, 0.27), ha="right", va="center", fontsize=7.5,
+                color="#8a6d3b",
+                arrowprops={"arrowstyle": "-", "color": "#8a6d3b", "lw": 0.7})
+
     lookup = dict(zip(profile["L"], profile["r"]))
+    ci_lo = dict(zip(profile["L"], profile["ci_lo"]))
+    ci_hi = dict(zip(profile["L"], profile["ci_hi"]))
     for lead in LABELLED:
         value = lookup[lead]
-        prefix = "peak " if lead == 26 else ""
         ax.plot([lead], [value], "o", color=LINE, ms=4.5, zorder=4)
-        ax.annotate(f"{prefix}r({lead}) = {value:.3f}",
-                    xy=(lead, value), xytext=(0, 13 if lead == 26 else -16),
-                    textcoords="offset points", ha="center", fontsize=8,
+        if lead == 26:
+            text = (f"peak r(26) = {value:.3f}\n"
+                    f"95% CI [{ci_lo[lead]:.2f}, {ci_hi[lead]:.2f}]")
+            offset, ha = (0, 14), "center"
+        elif lead == 25:
+            ax.annotate(f"r(25) = {value:.3f}", xy=(lead, value), xytext=(33, 0.46),
+                        ha="left", va="center", fontsize=8, color="#1a1a1a", zorder=5,
+                        arrowprops={"arrowstyle": "-", "color": "#999999", "lw": 0.7})
+            continue
+        else:
+            text, offset, ha = f"r({lead}) = {value:.3f}", (0, -16), "center"
+        ax.annotate(text, xy=(lead, value), xytext=offset,
+                    textcoords="offset points", ha=ha, fontsize=8,
                     color="#1a1a1a", zorder=5)
 
+    neg = profile[profile["L"] < 0]
+    neg_row = neg.loc[neg["r"].abs().idxmax()]
+    ax.annotate(f"largest reverse-direction value\n"
+                f"|r| = {abs(neg_row['r']):.3f} at L = {int(neg_row['L'])} (inside the band)",
+                xy=(neg_row["L"], neg_row["r"]), xytext=(-14, 0.47),
+                ha="center", va="bottom", fontsize=7.5, color="#555555",
+                arrowprops={"arrowstyle": "-", "color": "#999999", "lw": 0.8})
     ax.annotate("G leads M\n(reverse direction)", xy=(-18, -0.16),
                 ha="center", va="center", fontsize=8, color="#777777")
 
     ax.set_xlim(-26, 52)
     ax.set_ylim(-0.30, 0.72)
-    ax.set_xlabel("Lead L (weeks; positive = media leads search interest)")
+    n_leads = len(profile)
+    ax.set_xlabel(f"Lead L (weeks; {n_leads} leads scanned from -26 to 52; "
+                  "positive = media leads search interest)")
     ax.set_ylabel(r"$\rho(L) = \mathrm{corr}(M_t,\, G_{t+L})$")
     ax.legend(frameon=False, fontsize=8, loc="upper left")
 
