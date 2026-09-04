@@ -146,9 +146,10 @@ def nested(G, h):
     return pd.DataFrame(out), pd.DataFrame(oos), len(d)
 
 for G in ["idx_orig34_weighted","idx_cleaned_weighted"]:
-    tab, oos, n = nested(G, 25)
-    tab.to_csv(f"{OUT}/nested_{G}_h25.csv", index=False); oos.to_csv(f"{OUT}/nested_oos_{G}_h25.csv", index=False)
-    print(f"--- {G} (h=25, n={n})"); print(tab.to_string(index=False)); print(oos.to_string(index=False), flush=True)
+    for _h in (25, 26):
+        tab, oos, n = nested(G, _h)
+        tab.to_csv(f"{OUT}/nested_{G}_h{_h}.csv", index=False); oos.to_csv(f"{OUT}/nested_oos_{G}_h{_h}.csv", index=False)
+        print(f"--- {G} (h={_h}, n={n})"); print(tab.to_string(index=False)); print(oos.to_string(index=False), flush=True)
 
 json.dump(res, open(f"{OUT}/tone_split_results.json","w"), indent=1)
 master[["Week","m_pos","m_neg"]].to_csv(f"{OUT}/tone_split_series.csv", index=False)

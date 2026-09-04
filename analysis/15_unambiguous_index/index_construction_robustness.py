@@ -30,12 +30,14 @@ import unambiguous_index as ui
 
 ROOT = _RepoPath(_REPO)
 OUT = ROOT / "analysis" / "15_unambiguous_index"
-HORIZON = 25
+import os as _os
+HORIZONS = [int(_os.environ['IDX_H'])] if _os.environ.get('IDX_H') else list(range(19, 27))
+HORIZON = HORIZONS[0]
 
 UMBRELLA_ONLY = ["geoengineering", "geoengineer", "climate engineering", "climate engineer"]
 
 
-def main() -> None:
+def run(HORIZON: int) -> None:
     gt = pd.read_csv(ROOT / "data/07_weekly_series/gt_weekly_36tokens_2018_2022.csv")
     gt["Week"] = pd.to_datetime(gt["Week"])
     master = pd.read_csv(ROOT / "analysis/08_rebuild/weekly_series_master.csv",
@@ -76,10 +78,13 @@ def main() -> None:
         "energy_significant_in": significant,
         "results": rows,
     }
-    (OUT / "index_construction_robustness.json").write_text(json.dumps(payload, indent=2) + "\n")
+    (OUT / f"index_construction_robustness_h{HORIZON}.json").write_text(json.dumps(payload, indent=2) + "\n")
+    if HORIZON == 25:
+        (OUT / "index_construction_robustness.json").write_text(json.dumps(payload, indent=2) + "\n")
     print(f"\nenergy first-ranked in {energy_first}/{len(rows)} constructions; "
           f"p < .05 in {significant}/{len(rows)}")
 
 
 if __name__ == "__main__":
-    main()
+    for _h in HORIZONS:
+        run(_h)

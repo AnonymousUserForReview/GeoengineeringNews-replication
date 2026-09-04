@@ -39,8 +39,6 @@ def _sha256(path: Path) -> str:
 
 def main() -> None:
     curves = np.load(CURVE_PATH)
-    noise = np.load(NOISE_PATH)
-    oos = pd.read_csv(OOS_PATH)
     leads = np.arange(53)
 
     rp = np.asarray(curves["rp"], dtype=float)
@@ -54,12 +52,6 @@ def main() -> None:
         raise ValueError("stored difference curve does not equal rp-rn")
 
     clearing = np.asarray(curves["clearing_leads"], dtype=int)
-    rmse = oos["OOS_RMSE"].to_numpy(dtype=float)
-    if rmse.shape != (4,) or not np.isfinite(rmse).all():
-        raise ValueError("expected four finite OOS RMSE rows")
-    shifted = np.asarray(noise["noise"], dtype=float)
-    if shifted.shape != (200,) or not np.isfinite(shifted).all():
-        raise ValueError("expected 200 finite shifted-tone benchmark draws")
 
     plt.rcParams.update(
         {
@@ -157,43 +149,24 @@ def main() -> None:
         fontsize=8,
     )
 
-    bar_colors = ["#999999", "#4C72B0", "#E69F00", "#CC79A7"]
-    labels = ["Baseline", "+ topic\nvolume", "+ topic\ntone", "+ tone\ninteractions"]
-    positions = np.arange(4)
-    bars = rmse_axis.bar(positions, rmse, color=bar_colors, width=0.62)
-    for bar, value in zip(bars, rmse, strict=True):
-        rmse_axis.text(
-            bar.get_x() + bar.get_width() / 2,
-            value + 0.07,
-            f"{value:.2f}",
-            ha="center",
-            va="bottom",
-            fontsize=8,
-        )
-
-    shifted_mean = float(shifted.mean())
-    shifted_low, shifted_high = np.quantile(shifted, [0.025, 0.975])
-    benchmark_x = 2.35
-    rmse_axis.errorbar(
-        benchmark_x,
-        shifted_mean,
-        yerr=[[shifted_mean - shifted_low], [shifted_high - shifted_mean]],
-        fmt="D",
-        color="#333333",
-        capsize=4,
-        markersize=5,
-        zorder=5,
-    )
-    rmse_axis.text(
-        benchmark_x - 0.05, shifted_high + 0.12,
-        f"shifted-tone benchmark\n{shifted_mean:.2f} [{shifted_low:.1f}, {shifted_high:.1f}]",
-        ha="center", va="bottom", fontsize=7.5, color="#333333",
-    )
-    rmse_axis.set_xticks(positions, labels)
+    band = json.loads((ROOT / "analysis/09_stats/pooled_model/horizon_band_19_26.json").read_text())
+    rows = band["by_horizon"]; H = [r["h"] for r in rows]
+    lo = [r["benchmark"]["ci"][0] for r in rows]; hi = [r["benchmark"]["ci"][1] for r in rows]
+    rmse_axis.fill_between(H, lo, hi, color="#BDBDBD", alpha=0.45, lw=0, label="shifted-tone benchmark, 95% interval")
+    for key, col, lab, mk in (("baseline", "#999999", "baseline", "s"), ("volume", "#4C72B0", "+ topic volume", "o"), ("tone", "#E69F00", "+ topic tone", "D")):
+        vals = [r["ladder"][key]["oos_rmse"] for r in rows]
+        rmse_axis.plot(H, vals, marker=mk, color=col, lw=1.4, ms=5, label=lab)
+    inside = sum(l <= r["ladder"]["tone"]["oos_rmse"] <= u for r, l, u in zip(rows, lo, hi))
+    better = sum(r["ladder"]["volume"]["oos_rmse"] < r["ladder"]["baseline"]["oos_rmse"] for r in rows)
+    rmse_axis.text(0.02, 0.97, f"tone model inside the benchmark interval at {inside} of 8 horizons\n"
+                   f"topic volume lowers the error at {better} of 8 horizons",
+                   transform=rmse_axis.transAxes, ha="left", va="top", fontsize=7.5, color="#333333")
+    rmse_axis.set_xticks(H)
+    rmse_axis.set_xlabel("Horizon h (weeks)")
     rmse_axis.set_ylabel("Out-of-sample RMSE (lower is better)")
-    rmse_axis.set_ylim(10.0, max(16.2, float(rmse.max()) + 0.6))
+    rmse_axis.legend(frameon=False, fontsize=7.5, loc="lower right")
     rmse_axis.set_title(
-        "B. Tone block versus shifted benchmark", loc="left", fontweight="bold"
+        "B. Prediction error by horizon", loc="left", fontweight="bold"
     )
 
     figure.suptitle(
@@ -211,7 +184,7 @@ def main() -> None:
         "claim_neutral_rebuild": True,
         "inputs": {
             path.relative_to(ROOT).as_posix(): _sha256(path)
-            for path in (CURVE_PATH, NOISE_PATH, OOS_PATH)
+            for path in (CURVE_PATH, ROOT / "analysis/09_stats/pooled_model/horizon_band_19_26.json")
         },
         "outputs": {
             path.relative_to(ROOT).as_posix(): {

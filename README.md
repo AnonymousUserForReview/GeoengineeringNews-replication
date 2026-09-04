@@ -27,16 +27,17 @@ nothing fails silently. Individual stages: `python run_all.py --stages pooled,to
 | `lag_profile` | scan-corrected lead–lag profiles, max-statistic null bands, influence diagnostics, leave-one-token-out family, 16-combination variant table | RQ1; SI S4, S11 |
 | `lag_figures` | | Figures 2–3; SI two-panel figures |
 | `adl` | ADL models, cumulative/long-run multipliers, event terms, Granger diagnostics | RQ1 dynamics; SI S4 |
-| `pooled` | corrected pooled topic model at h ∈ {12,16,20,25,26}, moving-block bootstrap, tone interactions, per-topic FDR table | Table 4, Figure 4; SI S8, S10–S11 |
+| `pooled` | corrected pooled topic model at h ∈ {12,16,20,25,26} and across the 19–26-week band (`run_horizon_band.py`: HAC and OLS errors, bootstrap, tone interactions, prediction ladder and benchmark at every horizon), per-topic FDR table | Table 4, Figure 3; SI S8, S10–S11 |
 | `tone` | nested block decomposition, tone-split permutation tests, shifted-tone benchmark | RQ3, Figure 5; SI S10 |
 | `cross_retrieval` | cross-retrieval stability of every search-term series | SI S3 |
 | `coverage_sensitivity` | news-token retention-rule sensitivity | SI S11 |
 | `lexical_overlap` | energy result under indices stripped of energy-named terms | RQ2 robustness |
 | `unambiguous` | unambiguous-term index, seven-construction ranking robustness, per-construction verdict table | RQ2/robustness; SI Table |
 | `tables` | SI token-audit LaTeX table | SI S2 |
+| `band_outputs` | Figure 3 (energy across the horizon band; all topics), Table 4, the SI band tables, and Figure 4 with the by-horizon prediction ladder | Figures 3–4, Table 4; SI S10 |
 
 Every script sets explicit random seeds; `--verify` compares the regenerated
-headline numbers (energy coefficient and bootstrap CI, peak lead–lag correlation
+headline numbers (energy coefficient and bootstrap CI, the horizon-band counts, peak lead–lag correlation
 and null band, verdict counts) against `expected_values.json` with tolerances
 that absorb platform-level floating-point differences.
 

@@ -33,7 +33,7 @@ OUT = ROOT / "analysis" / "14_lexical_overlap"
 
 CATS = ["art", "disaster", "economy", "education", "energy", "medical",
         "nature", "politics", "pollution", "religion", "society", "technology"]
-HORIZONS = [12, 16, 20, 25, 26]
+HORIZONS = list(range(19, 27))
 BLOCK = 25
 NBOOT = 1000
 SEED = 42

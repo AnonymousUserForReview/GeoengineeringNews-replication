@@ -88,7 +88,8 @@ df = master.merge(ps[["Week"]+CATS].rename(columns={c:f"sal_{c}" for c in CATS})
 df = df.merge(pt[["Week"]+CATS].rename(columns={c:f"ton_{c}" for c in CATS}), on="Week")
 for c in [c for c in df.columns if c.startswith(("sal_","ton_"))]:
     df[c]=(df[c]-df[c].mean())/df[c].std()
-h=25
+import os as _os
+h=int(_os.environ.get('TONE_H','25'))
 df["y"]=df["idx_cleaned_weighted"].shift(-h); df["G1"]=df["idx_cleaned_weighted"]; df["G2"]=df["idx_cleaned_weighted"].shift(1)
 woy=df["Week"].dt.isocalendar().week.astype(float)
 df["s1"],df["c1s"],df["s2"],df["c2s"]=np.sin(2*np.pi*woy/52),np.cos(2*np.pi*woy/52),np.sin(4*np.pi*woy/52),np.cos(4*np.pi*woy/52)
@@ -116,5 +117,5 @@ for si in range(S):
     dd=d.copy(); dd[ton]=np.roll(tonmat, k, axis=0)
     noise_rmse[si]=oos(dd, base+sal+ton)
 print(f"B: shifted-tone RMSE mean {noise_rmse.mean():.2f}, 2.5-97.5 pct [{np.percentile(noise_rmse,2.5):.2f},{np.percentile(noise_rmse,97.5):.2f}]; real within? {np.percentile(noise_rmse,2.5)<=r_m2<=np.percentile(noise_rmse,97.5)}", flush=True)
-np.savez(f"{ROOT}/analysis/10_volume_vs_tone/noise_benchmark.npz", r_m1=r_m1, r_m2=r_m2, noise=noise_rmse, r_m0=oos(d,base))
+np.savez(f"{ROOT}/analysis/10_volume_vs_tone/noise_benchmark_h{h}.npz", r_m1=r_m1, r_m2=r_m2, noise=noise_rmse, r_m0=oos(d,base))
 print("DONE")

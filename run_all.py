@@ -67,6 +67,7 @@ STAGES = [
         [
             "analysis/09_stats/pooled_model/run_corrected_pooled_model.py",
             "analysis/09_stats/pooled_model/run_corrected_tone_interaction.py",
+            "analysis/09_stats/pooled_model/run_horizon_band.py",
             "analysis/09_stats/pooled_model/run_pooled_model.py",
             "analysis/09_stats/pooled_model/build_topic_coefficient_figure.py",
             "analysis/09_stats/pooled_model/build_tone_horizon_figure.py",
@@ -84,7 +85,6 @@ STAGES = [
         [
             "analysis/10_volume_vs_tone/run.py",
             "analysis/10_volume_vs_tone/strengthen_fig5.py",
-            "analysis/10_volume_vs_tone/build_claim_neutral_figure.py",
         ],
         [
             "analysis/08_rebuild/weekly_series_master.csv",
@@ -139,12 +139,29 @@ STAGES = [
         ["analysis/06_token_audit/audit_precision_table.csv"],
         "SI token-audit table",
     ),
+    (
+        "band_outputs",
+        [
+            "analysis/09_stats/pooled_model/build_horizon_band_outputs.py",
+            "analysis/10_volume_vs_tone/build_claim_neutral_figure.py",
+        ],
+        [
+            "analysis/09_stats/pooled_model/horizon_band_19_26.json",
+            "analysis/14_lexical_overlap/energy_lexical_overlap.json",
+            "analysis/15_unambiguous_index/index_construction_robustness_h19.json",
+            "analysis/10_volume_vs_tone/dr_curve.npz",
+        ],
+        "Figure 3 (horizon band), Table 4, SI band tables, Figure 4 with the by-horizon ladder",
+    ),
 ]
 
 # scripts that read paths relative to the repository root
 CWD_REPO = {
     "analysis/09_stats/pooled_model/run_corrected_pooled_model.py",
     "analysis/09_stats/pooled_model/run_corrected_tone_interaction.py",
+    "analysis/09_stats/pooled_model/run_horizon_band.py",
+    "analysis/09_stats/pooled_model/build_horizon_band_outputs.py",
+    "analysis/15_unambiguous_index/index_construction_robustness.py",
 }
 
 
@@ -202,6 +219,15 @@ def verify() -> int:
         checks.append(("global null band", close(band, e["band_global"], 0.01)))
     except FileNotFoundError:
         checks.append(("lag-profile outputs present", False))
+
+    try:
+        band = json.loads((REPO / "analysis/09_stats/pooled_model/horizon_band_19_26.json").read_text())["summary"]
+        e = expected["horizon_band"]
+        for key in ("energy_positive_at", "energy_first_at", "energy_sig05_hac_at", "tone_within_benchmark_at"):
+            checks.append((f"band {key}", band[key] == e[key]))
+        checks.append(("band energy mean", close(band["energy_b_mean"], e["energy_b_mean"], 0.05)))
+    except FileNotFoundError:
+        checks.append(("horizon-band outputs present", False))
 
     try:
         verd = json.loads(

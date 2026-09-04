@@ -58,9 +58,9 @@ for G in ["idx_cleaned_weighted","idx_orig34_weighted"]:
             out[key]["G2"]=[round(r.params["G2"],3),round(r.bse["G2"],3),round(r.pvalues["G2"],4)]
             out[key]["covid"]=[round(r.params["covid"],3),round(r.bse["covid"],3),round(r.pvalues["covid"],4)]
 
-# bootstrap rank stability + energy CI at h=25, both indices under the corrected spec
-def bootstrap_h25(G):
-    d=build(G,25); n=len(d); rng=np.random.default_rng(42); bl=25
+# bootstrap rank stability + energy CI at the featured horizons, both indices under the corrected spec
+def bootstrap_h(G,h):
+    d=build(G,h); n=len(d); rng=np.random.default_rng(42); bl=max(h,25)
     bs=[]; rank1s=0
     for _ in range(1000):
         idx=np.concatenate([np.arange(s,s+bl)%n for s in rng.integers(0,n,n//bl+1)])[:n]
@@ -74,7 +74,8 @@ def bootstrap_h25(G):
     return {"energy_CI":[round(float(np.percentile(bs,2.5)),3),round(float(np.percentile(bs,97.5)),3)],
             "rank1_share":round(rank1s/len(bs),3),"n_boot":len(bs)}
 
-out["bootstrap_h25_cleaned"]=bootstrap_h25("idx_cleaned_weighted")
-out["bootstrap_h25_orig34"]=bootstrap_h25("idx_orig34_weighted")
+for _h in (25,26):
+    out[f"bootstrap_h{_h}_cleaned"]=bootstrap_h("idx_cleaned_weighted",_h)
+    out[f"bootstrap_h{_h}_orig34"]=bootstrap_h("idx_orig34_weighted",_h)
 print(json.dumps(out,indent=1))
 json.dump(out,open("analysis/09_stats/pooled_model/corrected_final_spec.json","w"),indent=1)
