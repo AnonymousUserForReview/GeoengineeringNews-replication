@@ -62,7 +62,7 @@ def main() -> None:
     ax.axhline(band["summary"]["energy_b_mean"], color="#d95f02", lw=0.9, ls=(0, (4, 3)), zorder=1)
     ax.text(23.5, band["summary"]["energy_b_mean"] + 0.06, f"mean {band['summary']['energy_b_mean']:.2f}",
             ha="center", va="bottom", fontsize=8, color="#b34700")
-    ax.text(19.5, -1.55, "shaded: horizons at which coverage and search interest line up in Figure 1",
+    ax.text(19.5, -1.55, "shaded: horizons circled in Figure 1 (r above 0.346)",
             ha="left", va="center", fontsize=7.5, color="#4C78A8")
     ax.set_xticks(H)
     ax.set_xlim(18.4, 26.6)
@@ -95,16 +95,16 @@ def main() -> None:
     # ---------- Table 4: the band, one row per horizon ----------
     def p(x):
         return "$<$.0001" if x < 1e-4 else f"{x:.3f}".lstrip("0")
-    lines = [r"\begin{tabular}{lcccccccc}", r"\toprule",
-             r"$h$ & $r(h)$ & Energy $\hat\beta$ & HAC s.e. & OLS s.e. & Bootstrap 95\% CI & First in resamples & Energy rank & Next largest \\",
+    lines = [r"\begin{tabular}{lccccccl}", r"\toprule",
+             r"Horizon $h$ & $r(h)$ & Energy coef. & s.e. & Range on resampled weeks & Share first & Rank & Next largest \\",
              r"\midrule"]
     for r in rows:
         star = r"$^{\ast}$" if clears[r["h"]] else ""
-        lines.append(f"{r['h']}{star} & {rL[r['h']]:.3f} & {r['energy_b']:.2f} & {r['energy_se_hac']:.2f} & {r['energy_se_ols']:.2f} & "
+        lines.append(f"{r['h']}{star} & {rL[r['h']]:.3f} & {r['energy_b']:.2f} & {r['energy_se_hac']:.2f} & "
                      f"[{r['energy_boot_ci'][0]:.2f}, {r['energy_boot_ci'][1]:.2f}] & {100*r['rank1_share']:.0f}\\% & {r['energy_rank']} & "
                      f"{r['runner_up']} \\\\")
     lines += [r"\bottomrule",
-              r"\multicolumn{9}{l}{\footnotesize $^{\ast}$horizon at which $r(h)$ exceeds $\pm" + f"{band_global:.3f}" + r"$, the largest correlation chance alone produces in the scan. HAC: Newey--West with lag $\max(h,25)$.}\\",
+              r"\multicolumn{8}{l}{\footnotesize $^{\ast}$$r(h)$ exceeds $\pm" + f"{band_global:.3f}" + r"$, the largest correlation chance alone produces. s.e.: Newey--West standard error; plain OLS standard errors are in SI Table~\ref{tab:si_topic_band}.}\\",
               r"\end{tabular}"]
     (GEN / "pooled_band_table.tex").write_text("\n".join(lines) + "\n")
 
@@ -134,6 +134,8 @@ def main() -> None:
             elif e["p_hac"] < 0.10: s += r"\sym{*}"
             cells.append(s)
         lines.append(f"{name} & " + " & ".join(cells) + r" \\")
+    lines.append("Energy s.e., Newey--West & " + " & ".join(f"{r['energy_se_hac']:.2f}" for r in rows) + r" \\")
+    lines.append("Energy s.e., plain OLS & " + " & ".join(f"{r['energy_se_ols']:.2f}" for r in rows) + r" \\")
     lines.append("Adj.\\ $R^2$ & " + " & ".join(f"{r['adjR2']:.3f}" for r in rows) + r" \\")
     lines.append("$N$ (weeks) & " + " & ".join(str(r["N"]) for r in rows) + r" \\")
     lines += [r"\bottomrule",

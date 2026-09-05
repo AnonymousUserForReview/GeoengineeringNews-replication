@@ -69,6 +69,10 @@ def main() -> None:
     ax.axhline(0, color="black", lw=0.8, zorder=2)
     ax.axvline(0, color="#bbbbbb", lw=0.8, zorder=1)
 
+    # the leads at which the correlation exceeds the level chance alone produces
+    over = [int(L) for L in leads if L > 0 and abs(r[L]) > band]
+    ax.plot(over, [r[L] for L in over], "o", color="#4C78A8", ms=6.5, mfc="none", mew=1.4, zorder=4,
+            label=f"leads at which r exceeds {band:.3f}: {', '.join(str(L) for L in over)}")
     # the two points the text reads off the figure
     ax.plot([26], [r[26]], "o", color=LINE, ms=5.5, zorder=4)
     ax.text(27.2, r[26] + 0.02,
