@@ -59,12 +59,12 @@ def main() -> None:
     ax.axhspan(-band, band, color="#d9d9d9", alpha=0.30, zorder=0, lw=0)
     for sign in (1, -1):
         ax.axhline(sign * band, color=MUTED, lw=0.9, ls=(0, (4, 3)), zorder=2)
-    ax.text(51.5, -band - 0.012, f"95% null band ±{band:.3f}\n(largest correlation chance produces in this scan)",
+    ax.text(51.5, -band - 0.012, f"±{band:.3f}: the largest correlation chance alone\nproduces anywhere in this scan (95% of shuffles)",
             ha="right", va="top", fontsize=7.5, color=MUTED, linespacing=1.2)
 
     ax.fill_between(leads, profile["ci_lo"], profile["ci_hi"],
                     color=RIBBON, alpha=0.45, lw=0, zorder=1,
-                    label="95% block-bootstrap interval")
+                    label="range of estimates on resampled blocks of weeks (95%)")
     ax.plot(leads, profile["r"], color=LINE, lw=2.0, zorder=3)
     ax.axhline(0, color="black", lw=0.8, zorder=2)
     ax.axvline(0, color="#bbbbbb", lw=0.8, zorder=1)

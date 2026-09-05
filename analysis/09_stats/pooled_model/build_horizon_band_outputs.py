@@ -62,14 +62,14 @@ def main() -> None:
     ax.axhline(band["summary"]["energy_b_mean"], color="#d95f02", lw=0.9, ls=(0, (4, 3)), zorder=1)
     ax.text(23.5, band["summary"]["energy_b_mean"] + 0.06, f"mean {band['summary']['energy_b_mean']:.2f}",
             ha="center", va="bottom", fontsize=8, color="#b34700")
-    ax.text(19.5, -1.55, "shaded: horizons at which the coverage–search correlation clears its chance band",
+    ax.text(19.5, -1.55, "shaded: horizons at which coverage and search interest line up in Figure 1",
             ha="left", va="center", fontsize=7.5, color="#4C78A8")
     ax.set_xticks(H)
     ax.set_xlim(18.4, 26.6)
     ax.set_ylim(-1.8, 4.2)
     ax.set_xlabel("Horizon h (weeks between coverage and search interest)")
-    ax.set_ylabel("Energy coefficient (index points per one-SD change)")
-    ax.set_title("A. Energy coverage, h = 19–26 (95% bootstrap intervals)", loc="left", fontweight="bold")
+    ax.set_ylabel("Index points per one-SD rise in energy coverage")
+    ax.set_title("A. Energy coefficient at each horizon, 19 to 26 weeks", loc="left", fontweight="bold")
 
     tb = band["topic_band"]
     order = sorted(CATS, key=lambda c: -tb[c]["mean"])
@@ -85,8 +85,8 @@ def main() -> None:
     bx.set_yticks(ys)
     bx.set_yticklabels([c.capitalize() for c in order])
     bx.set_xlim(-1.6, 3.6)
-    bx.set_xlabel("Mean over h = 19–26 (dot); range across horizons (line)")
-    bx.set_title("B. All twelve topics, h = 19–26", loc="left", fontweight="bold")
+    bx.set_xlabel("Mean over the eight horizons (dot) and range across them (line)")
+    bx.set_title("B. All twelve topics over the same horizons", loc="left", fontweight="bold")
     fig.tight_layout()
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.pdf")
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.png", dpi=300)
@@ -104,7 +104,7 @@ def main() -> None:
                      f"[{r['energy_boot_ci'][0]:.2f}, {r['energy_boot_ci'][1]:.2f}] & {100*r['rank1_share']:.0f}\\% & {r['energy_rank']} & "
                      f"{r['runner_up']} \\\\")
     lines += [r"\bottomrule",
-              r"\multicolumn{9}{l}{\footnotesize $^{\ast}$horizon at which the lead--lag correlation $r(h)$ clears the $\pm" + f"{band_global:.3f}" + r"$ chance band. HAC: Newey--West with lag $\max(h,25)$.}\\",
+              r"\multicolumn{9}{l}{\footnotesize $^{\ast}$horizon at which $r(h)$ exceeds $\pm" + f"{band_global:.3f}" + r"$, the largest correlation chance alone produces in the scan. HAC: Newey--West with lag $\max(h,25)$.}\\",
               r"\end{tabular}"]
     (GEN / "pooled_band_table.tex").write_text("\n".join(lines) + "\n")
 

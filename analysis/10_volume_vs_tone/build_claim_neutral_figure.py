@@ -61,7 +61,7 @@ def main() -> None:
             "axes.spines.right": False,
         }
     )
-    figure = plt.figure(figsize=(10.2, 4.9), constrained_layout=True)
+    figure = plt.figure(figsize=(11.6, 5.2), constrained_layout=True)
     grid = figure.add_gridspec(2, 2, width_ratios=(1.55, 1.0), height_ratios=(2, 1))
     profile_axis = figure.add_subplot(grid[0, 0])
     difference_axis = figure.add_subplot(grid[1, 0], sharex=profile_axis)
@@ -82,8 +82,8 @@ def main() -> None:
     profile_axis.axhline(band, color="#777777", linestyle="--", linewidth=0.9)
     profile_axis.text(
         51.5,
-        0.355,
-        f"95% scan band  ±{band:.3f}",
+        0.36,
+        f"±{band:.3f}: largest correlation\nchance alone produces",
         ha="right",
         va="bottom",
         color="#666666",
@@ -92,7 +92,7 @@ def main() -> None:
     profile_axis.text(
         22.5,
         0.055,
-        "leads clearing the band",
+        "leads at which coverage and search interest line up",
         ha="center",
         va="bottom",
         color="#4C78A8",
@@ -104,7 +104,7 @@ def main() -> None:
     profile_axis.plot([peak], [rn[peak]], "o", color=neg_color, ms=4, zorder=4)
     profile_axis.text(
         27.5, 0.47,
-        f"at L = 26:  negative-tone r = {rn[peak]:.2f},  positive-tone r = {rp[peak]:.2f}",
+        f"L = 26: negative {rn[peak]:.2f}, positive {rp[peak]:.2f}",
         ha="left", va="bottom", fontsize=7.5, color="#333333",
     )
     profile_axis.set_ylim(-0.05, 0.55)
@@ -124,16 +124,16 @@ def main() -> None:
         difference_axis.axvspan(lead - 0.5, lead + 0.5, color="#4C78A8", alpha=0.13, zorder=0)
     difference_axis.plot([peak], [delta[peak]], "o", color="#333333", ms=4, zorder=4)
     difference_axis.text(
-        27.5, 0.145,
-        f"at L = 26:  $\\Delta r$ = {delta[peak]:.2f}, band [{lower[peak]:.2f}, {upper[peak]:+.2f}]",
-        ha="left", va="center", fontsize=7.5, color="#333333",
+        52, 0.145,
+        f"L = 26: $\\Delta r$ = {delta[peak]:.2f}, range [{lower[peak]:.2f}, {upper[peak]:+.2f}]",
+        ha="right", va="center", fontsize=7.5, color="#333333",
     )
     gap = int(np.argmax(np.abs(delta)))
     difference_axis.plot([gap], [delta[gap]], "o", color="#333333", ms=4, zorder=4)
     difference_axis.text(
-        gap + 1.5, delta[gap] - 0.01,
+        gap + 1.5, delta[gap] - 0.005,
         f"largest gap {abs(delta[gap]):.2f} at L = {gap}",
-        ha="left", va="top", fontsize=7.5, color="#333333",
+        ha="left", va="center", fontsize=7.5, color="#333333",
     )
     difference_axis.set_ylim(-0.22, 0.17)
     difference_axis.set_ylabel(r"$\Delta r(L)$")
@@ -141,7 +141,7 @@ def main() -> None:
     difference_axis.text(
         0.01,
         0.95,
-        "Joint block-bootstrap 95% interval (shaded)",
+        "shaded: range of the gap on resampled blocks of weeks (95%)",
         transform=difference_axis.transAxes,
         ha="left",
         va="top",
@@ -152,21 +152,21 @@ def main() -> None:
     band = json.loads((ROOT / "analysis/09_stats/pooled_model/horizon_band_19_26.json").read_text())
     rows = band["by_horizon"]; H = [r["h"] for r in rows]
     lo = [r["benchmark"]["ci"][0] for r in rows]; hi = [r["benchmark"]["ci"][1] for r in rows]
-    rmse_axis.fill_between(H, lo, hi, color="#BDBDBD", alpha=0.45, lw=0, label="shifted-tone benchmark, 95% interval")
+    rmse_axis.fill_between(H, lo, hi, color="#BDBDBD", alpha=0.45, lw=0, label="tone series shifted in time (no information), 95% range")
     for key, col, lab, mk in (("baseline", "#999999", "baseline", "s"), ("volume", "#4C72B0", "+ topic volume", "o"), ("tone", "#E69F00", "+ topic tone", "D")):
         vals = [r["ladder"][key]["oos_rmse"] for r in rows]
         rmse_axis.plot(H, vals, marker=mk, color=col, lw=1.4, ms=5, label=lab)
     inside = sum(l <= r["ladder"]["tone"]["oos_rmse"] <= u for r, l, u in zip(rows, lo, hi))
     better = sum(r["ladder"]["volume"]["oos_rmse"] < r["ladder"]["baseline"]["oos_rmse"] for r in rows)
-    rmse_axis.text(0.02, 0.97, f"tone model inside the benchmark interval at {inside} of 8 horizons\n"
-                   f"topic volume lowers the error at {better} of 8 horizons",
+    rmse_axis.text(0.02, 0.97, f"with tone, the error is no better than with shifted tone at {inside} of 8 horizons\n"
+                   f"adding topic volume lowers the error at {better} of 8 horizons",
                    transform=rmse_axis.transAxes, ha="left", va="top", fontsize=7.5, color="#333333")
     rmse_axis.set_xticks(H)
     rmse_axis.set_xlabel("Horizon h (weeks)")
     rmse_axis.set_ylabel("Out-of-sample RMSE (lower is better)")
-    rmse_axis.legend(frameon=False, fontsize=7.5, loc="lower right")
+    rmse_axis.legend(frameon=False, fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=2)
     rmse_axis.set_title(
-        "B. Prediction error by horizon", loc="left", fontweight="bold"
+        "B. Error in predicting unseen weeks, by horizon", loc="left", fontweight="bold"
     )
 
     figure.suptitle(
