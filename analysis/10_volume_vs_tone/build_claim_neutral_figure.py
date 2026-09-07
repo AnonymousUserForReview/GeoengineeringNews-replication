@@ -150,23 +150,33 @@ def main() -> None:
     )
 
     band = json.loads((ROOT / "analysis/09_stats/pooled_model/horizon_band_19_26.json").read_text())
-    rows = band["by_horizon"]; H = [r["h"] for r in rows]
-    lo = [r["benchmark"]["ci"][0] for r in rows]; hi = [r["benchmark"]["ci"][1] for r in rows]
-    rmse_axis.fill_between(H, lo, hi, color="#BDBDBD", alpha=0.45, lw=0, label="tone series shifted in time (no information), 95% range")
-    for key, col, lab, mk in (("baseline", "#999999", "baseline", "s"), ("volume", "#4C72B0", "+ topic volume", "o"), ("tone", "#E69F00", "+ topic tone", "D")):
-        vals = [r["ladder"][key]["oos_rmse"] for r in rows]
-        rmse_axis.plot(H, vals, marker=mk, color=col, lw=1.4, ms=5, label=lab)
-    inside = sum(l <= r["ladder"]["tone"]["oos_rmse"] <= u for r, l, u in zip(rows, lo, hi))
-    better = sum(r["ladder"]["volume"]["oos_rmse"] < r["ladder"]["baseline"]["oos_rmse"] for r in rows)
-    rmse_axis.text(0.02, 0.97, f"with tone, the error is no better than with shifted tone at {inside} of 8 horizons\n"
-                   f"adding topic volume lowers the error at {better} of 8 horizons",
-                   transform=rmse_axis.transAxes, ha="left", va="top", fontsize=7.5, color="#333333")
+    rows = band["by_horizon"]
+    H = [r["h"] for r in rows]
+    # change in prediction error when the twelve tone series are added to the model that
+    # already has the twelve volume series: real tone against tone shifted in time (no information)
+    real = [r["ladder"]["tone"]["oos_rmse"] - r["ladder"]["volume"]["oos_rmse"] for r in rows]
+    fake_m = [r["benchmark"]["mean"] - r["ladder"]["volume"]["oos_rmse"] for r in rows]
+    fake_lo = [r["benchmark"]["ci"][0] - r["ladder"]["volume"]["oos_rmse"] for r in rows]
+    fake_hi = [r["benchmark"]["ci"][1] - r["ladder"]["volume"]["oos_rmse"] for r in rows]
+    for i, h in enumerate(H):
+        rmse_axis.plot([h, h], [fake_lo[i], fake_hi[i]], color="#9e9e9e", lw=7, solid_capstyle="butt",
+                       zorder=1, label="tone shifted in time, carrying no information (95% of 200 draws)" if i == 0 else None)
+        rmse_axis.plot([h - 0.22, h + 0.22], [fake_m[i], fake_m[i]], color="#616161", lw=1.4, zorder=2)
+    rmse_axis.plot(H, real, "o", color="#E69F00", ms=8, mec="#8a6100", mew=1.0, zorder=3,
+                   label="the real tone series")
+    rmse_axis.axhline(0, color="black", lw=1.0, zorder=2)
+    rmse_axis.text(18.55, 0.06, "worse", ha="left", va="bottom", fontsize=7.5, color="#555555")
+    rmse_axis.text(18.55, -0.06, "better", ha="left", va="top", fontsize=7.5, color="#555555")
+    inside = sum(lo <= r <= hi for r, lo, hi in zip(real, fake_lo, fake_hi))
+    rmse_axis.text(0.5, 0.97, f"the real tone series falls inside the no-information range\nat {inside} of the 8 horizons",
+                   transform=rmse_axis.transAxes, ha="center", va="top", fontsize=8, color="#333333")
     rmse_axis.set_xticks(H)
+    rmse_axis.set_xlim(18.4, 26.6)
     rmse_axis.set_xlabel("Horizon h (weeks)")
-    rmse_axis.set_ylabel("Out-of-sample RMSE (lower is better)")
-    rmse_axis.legend(frameon=False, fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=2)
+    rmse_axis.set_ylabel("Change in prediction error when tone is added\n(index points; above zero = worse predictions)")
+    rmse_axis.legend(frameon=False, fontsize=7.5, loc="lower center", bbox_to_anchor=(0.5, -0.30))
     rmse_axis.set_title(
-        "B. Error in predicting unseen weeks, by horizon", loc="left", fontweight="bold"
+        "B. Does tone help predict unseen weeks?", loc="left", fontweight="bold"
     )
 
     figure.suptitle(
