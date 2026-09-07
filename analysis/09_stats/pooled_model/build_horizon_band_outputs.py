@@ -79,27 +79,16 @@ def main() -> None:
         col = "#d95f02" if c == "energy" else "#1f3b73"
         bx.plot([tb[c]["min"], tb[c]["max"]], [y, y], color=col, lw=2.0, alpha=0.55, zorder=2)
         bx.plot([tb[c]["mean"]], [y], "o", color=col, ms=6, zorder=3)
-        ba = band.get("band_average", {})
-        if c == "energy" and ba:
-            lo_, hi_ = ba["energy_mean_ci"]
-            bx.plot([lo_, hi_], [y + 0.28, y + 0.28], color=col, lw=1.2, zorder=2)
-            bx.plot([lo_, lo_], [y + 0.2, y + 0.36], color=col, lw=1.2); bx.plot([hi_, hi_], [y + 0.2, y + 0.36], color=col, lw=1.2)
         label = f"{tb[c]['mean']:.2f}" + (f", first at {tb[c]['first_at']} of 8" if tb[c]["first_at"] else "")
 
         bx.text(tb[c]["max"] + 0.12, y, label, va="center", ha="left", fontsize=7.5,
                 color="#b34700" if c == "energy" else "#333333")
-    ba = band.get("band_average", {})
-    if ba:
-        fig.text(0.995, 0.012, f"Energy, mean over the eight horizons: {ba['energy_mean_over_horizons']:.2f}; range on resampled weeks "
-                               f"[{ba['energy_mean_ci'][0]:.2f}, {ba['energy_mean_ci'][1]:.2f}] (thin whisker); largest mean of the twelve in "
-                               f"{100*ba['share_energy_largest_mean']:.0f}% of resamples",
-                 ha="right", va="bottom", fontsize=7.5, color="#b34700")
     bx.set_yticks(ys)
     bx.set_yticklabels([c.capitalize() for c in order])
     bx.set_xlim(-1.6, 3.6)
     bx.set_xlabel("Mean over the eight horizons (dot) and range across them (line)")
     bx.set_title("B. All twelve topics over the same horizons", loc="left", fontweight="bold")
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.tight_layout()
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.pdf")
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.png", dpi=300)
     plt.close(fig)
