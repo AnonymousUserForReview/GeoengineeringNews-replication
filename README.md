@@ -23,23 +23,24 @@ nothing fails silently. Individual stages: `python run_all.py --stages pooled,to
 
 | Stage | What it produces | Paper artefacts |
 |---|---|---|
-| `rebuild` | weekly media-coverage variants and all index constructions (`analysis/08_rebuild/weekly_series_master.csv`) | Section 2 measures |
-| `lag_profile` | scan-corrected lead–lag profiles, max-statistic null bands, influence diagnostics, leave-one-token-out family, 16-combination variant table | RQ1; SI S4, S11 |
-| `lag_figures` | | Figures 2–3; SI two-panel figures |
-| `adl` | ADL models, cumulative/long-run multipliers, event terms, Granger diagnostics | RQ1 dynamics; SI S4 |
-| `pooled` | corrected pooled topic model at h ∈ {12,16,20,25,26} and across the 19–26-week band (`run_horizon_band.py`: HAC and OLS errors, bootstrap, tone interactions, prediction ladder and benchmark at every horizon), per-topic FDR table | Table 4, Figure 3; SI S8, S10–S11 |
-| `tone` | nested block decomposition, tone-split permutation tests, shifted-tone benchmark | RQ3, Figure 5; SI S10 |
-| `cross_retrieval` | cross-retrieval stability of every search-term series | SI S3 |
+| `rebuild` | weekly media-coverage variants and all index constructions (`analysis/08_rebuild/weekly_series_master.csv`) | Methods measures |
+| `lag_profile` | correlation between coverage and search interest at every lead, the level chance alone produces (max-statistic null), influence diagnostics at the peak lead, leave-one-token-out family, 16-combination variant table | RQ1; SI S4, S11 |
+| `lag_figures` | Figure 1 (correlation at each lead, leads above the chance level circled); Figure 2 (change in the correlation when each quarter or year is left out, at every horizon 19 to 26, `run_influence_by_horizon.py`); SI two-panel comparisons | Figures 1 and 2; SI figures |
+| `adl` | dynamic (ADL) models, cumulative and long-run multipliers, event terms, Granger diagnostics | RQ1 closing paragraph; SI S4 |
+| `pooled` | pooled topic model at h in {12,16,20,25,26} and at every horizon 19 to 26 (`run_horizon_band.py`: HAC and OLS errors, block bootstrap, the across-horizon mean with jointly resampled weeks, tone interactions, prediction ladder and shifted-tone benchmark at every horizon); per-topic FDR table; SI horizon figure | RQ2, RQ3; Table 2; SI S8, S10, S11 |
+| `tone` | tone-split correlation curves, permutation tests, archived tone scores reused | Figure 4A; SI S10 |
+| `cross_retrieval` | stability of every search-term series across separate downloads | SI S3 |
 | `coverage_sensitivity` | news-token retention-rule sensitivity | SI S11 |
-| `lexical_overlap` | energy result under indices stripped of energy-named terms | RQ2 robustness |
-| `unambiguous` | unambiguous-term index, seven-construction ranking robustness, per-construction verdict table | RQ2/robustness; SI Table |
+| `lexical_overlap` | energy result with energy-related search terms removed from the index, at every horizon 19 to 26 | RQ2 footnote; SI lexical table |
+| `unambiguous` | unambiguous-term index, seven-construction ranking at every horizon 19 to 26, per-construction verdict table | Robustness and scope; SI table |
 | `tables` | SI token-audit LaTeX table | SI S2 |
-| `band_outputs` | Figure 3 (energy across the horizon band; all topics), Table 4, the SI band tables, and Figure 4 with the by-horizon prediction ladder | Figures 3–4, Table 4; SI S10 |
+| `band_outputs` | Figure 3 (energy at each horizon; all twelve topics over the horizons), Table 2 (`generated/pooled_band_table.tex`), the SI band tables, and Figure 4 with panel B (change in prediction error when tone is added, real tone against tone shifted in time) | Figures 3 and 4, Table 2; SI S10 tables |
 
 Every script sets explicit random seeds; `--verify` compares the regenerated
-headline numbers (energy coefficient and bootstrap CI, the horizon-band counts, peak lead–lag correlation
-and null band, verdict counts) against `expected_values.json` with tolerances
-that absorb platform-level floating-point differences.
+headline numbers (energy coefficient and bootstrap CI at h = 25, the counts
+across the horizons 19 to 26, peak correlation and chance level, verdict
+counts) against `expected_values.json` with tolerances that absorb
+platform-level floating-point differences.
 
 ## Data
 
@@ -71,6 +72,9 @@ Scripts are the research originals with one mechanical change (a
 repository-self-locating root replaces an absolute path; see the prelude at the
 top of each script). Figures write to `manuscript/src/graphs-Round3/`, LaTeX
 tables to `manuscript/src/generated/`, statistics to their stage directories.
+The four main-text figures are `fig_lag_profile_main.pdf` (Figure 1),
+`fig_influence_main.pdf` (Figure 2), `fig_topic_coefficients_main.pdf`
+(Figure 3) and `fig_tone_split.pdf` (Figure 4).
 
 ## License
 
