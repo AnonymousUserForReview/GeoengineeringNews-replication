@@ -49,9 +49,10 @@ STAGES = [
             "analysis/09_stats/lag_profile/make_figures.py",
             "analysis/09_stats/lag_profile/build_main_lag_figure.py",
             "analysis/09_stats/lag_profile/build_main_influence_figure.py",
+            "analysis/09_stats/lag_profile/run_influence_by_horizon.py",
         ],
         ["analysis/09_stats/lag_profile/focal_profile_primary.csv"],
-        "main-text Figures 2-3 and the SI two-panel comparisons",
+        "main-text Figures 1-2 (Figure 2 at every horizon 19-26) and the SI two-panel comparisons",
     ),
     (
         "adl",

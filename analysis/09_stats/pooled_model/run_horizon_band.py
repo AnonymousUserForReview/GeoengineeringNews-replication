@@ -161,6 +161,44 @@ def main() -> None:
               f"boot {row['energy_boot_ci']} rank1 {row['rank1_share']:.2f} rank {row['energy_rank']} | "
               f"ladder OOS {[ladder[k]['oos_rmse'] for k in ladder]} bench {row['benchmark']['mean']:.2f}", flush=True)
 
+    # ---- the eight horizons together: resample the same weeks for all eight models at once
+    designs = {h: design(df, h) for h in HORIZONS}
+    common = sorted(set.intersection(*[set(designs[h]["Week"]) for h in HORIZONS]))
+    designs = {h: designs[h][designs[h]["Week"].isin(common)].reset_index(drop=True) for h in HORIZONS}
+    n = len(common)
+    rng = np.random.default_rng(7)
+    means, first_by_mean = [], 0
+    topic_means = {c: [] for c in CATS}
+    for _ in range(NBOOT):
+        idx = np.concatenate([np.arange(s, s + 26) % n for s in rng.integers(0, n, n // 26 + 1)])[:n]
+        coefs = {c: [] for c in CATS}
+        ok = True
+        for h in HORIZONS:
+            dd = designs[h].iloc[idx]
+            try:
+                rr = sm.OLS(dd["y"], sm.add_constant(dd[COLS])).fit()
+            except Exception:
+                ok = False
+                break
+            for c in CATS:
+                coefs[c].append(rr.params[f"sal_{c}"])
+        if not ok:
+            continue
+        m_ = {c: float(np.mean(coefs[c])) for c in CATS}
+        means.append(m_["energy"])
+        for c in CATS:
+            topic_means[c].append(m_[c])
+        first_by_mean += max(m_, key=lambda c: abs(m_[c])) == "energy"
+    point = {c: float(np.mean([full[h][c]["b"] for h in HORIZONS])) for c in CATS}
+    band_average = {
+        "weeks_common_to_all_horizons": n,
+        "energy_mean_over_horizons": round(point["energy"], 3),
+        "energy_mean_ci": [round(float(np.percentile(means, 2.5)), 3), round(float(np.percentile(means, 97.5)), 3)],
+        "share_energy_largest_mean": round(first_by_mean / len(means), 3),
+        "topic_mean_ci": {c: [round(float(np.percentile(topic_means[c], 2.5)), 3), round(float(np.percentile(topic_means[c], 97.5)), 3)] for c in CATS},
+        "n_boot": len(means),
+    }
+    print("BAND AVERAGE", json.dumps(band_average), flush=True)
     # band summaries
     eb = [r["energy_b"] for r in rows]
     summary = {
@@ -181,7 +219,7 @@ def main() -> None:
         bs = [full[h][c]["b"] for h in HORIZONS]
         firsts = sum(1 for h in HORIZONS if max(CATS, key=lambda k: abs(full[h][k]["b"])) == c)
         topic_band[c] = {"mean": round(float(np.mean(bs)), 3), "min": min(bs), "max": max(bs), "first_at": firsts}
-    payload = {"summary": summary, "by_horizon": rows, "coefficients": full, "topic_band": topic_band}
+    payload = {"summary": summary, "by_horizon": rows, "coefficients": full, "topic_band": topic_band, "band_average": band_average}
     (OUT / "horizon_band_19_26.json").write_text(json.dumps(payload, indent=1) + "\n")
     pd.DataFrame([{k: v for k, v in r.items() if k not in ("ladder", "benchmark")} for r in rows]).to_csv(OUT / "horizon_band_19_26.csv", index=False)
     print("\nSUMMARY", json.dumps(summary))

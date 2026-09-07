@@ -79,15 +79,27 @@ def main() -> None:
         col = "#d95f02" if c == "energy" else "#1f3b73"
         bx.plot([tb[c]["min"], tb[c]["max"]], [y, y], color=col, lw=2.0, alpha=0.55, zorder=2)
         bx.plot([tb[c]["mean"]], [y], "o", color=col, ms=6, zorder=3)
+        ba = band.get("band_average", {})
+        if c == "energy" and ba:
+            lo_, hi_ = ba["energy_mean_ci"]
+            bx.plot([lo_, hi_], [y + 0.28, y + 0.28], color=col, lw=1.2, zorder=2)
+            bx.plot([lo_, lo_], [y + 0.2, y + 0.36], color=col, lw=1.2); bx.plot([hi_, hi_], [y + 0.2, y + 0.36], color=col, lw=1.2)
         label = f"{tb[c]['mean']:.2f}" + (f", first at {tb[c]['first_at']} of 8" if tb[c]["first_at"] else "")
+
         bx.text(tb[c]["max"] + 0.12, y, label, va="center", ha="left", fontsize=7.5,
                 color="#b34700" if c == "energy" else "#333333")
+    ba = band.get("band_average", {})
+    if ba:
+        fig.text(0.995, 0.012, f"Energy, mean over the eight horizons: {ba['energy_mean_over_horizons']:.2f}; range on resampled weeks "
+                               f"[{ba['energy_mean_ci'][0]:.2f}, {ba['energy_mean_ci'][1]:.2f}] (thin whisker); largest mean of the twelve in "
+                               f"{100*ba['share_energy_largest_mean']:.0f}% of resamples",
+                 ha="right", va="bottom", fontsize=7.5, color="#b34700")
     bx.set_yticks(ys)
     bx.set_yticklabels([c.capitalize() for c in order])
     bx.set_xlim(-1.6, 3.6)
     bx.set_xlabel("Mean over the eight horizons (dot) and range across them (line)")
     bx.set_title("B. All twelve topics over the same horizons", loc="left", fontweight="bold")
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.pdf")
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.png", dpi=300)
     plt.close(fig)
@@ -95,17 +107,18 @@ def main() -> None:
     # ---------- Table 4: the band, one row per horizon ----------
     def p(x):
         return "$<$.0001" if x < 1e-4 else f"{x:.3f}".lstrip("0")
-    lines = [r"\begin{tabular}{lccccccl}", r"\toprule",
-             r"Horizon $h$ & $r(h)$ & Energy coef. & s.e. & Range on resampled weeks & Share first & Rank & Next largest \\",
+    lines = [r"\begin{tabular}{lccccc}", r"\toprule",
+             r"Horizon $h$ & $r(h)$ & Energy coefficient & s.e. & Range on resampled weeks & Rank of energy \\",
              r"\midrule"]
     for r in rows:
         star = r"$^{\ast}$" if clears[r["h"]] else ""
         lines.append(f"{r['h']}{star} & {rL[r['h']]:.3f} & {r['energy_b']:.2f} & {r['energy_se_hac']:.2f} & "
-                     f"[{r['energy_boot_ci'][0]:.2f}, {r['energy_boot_ci'][1]:.2f}] & {100*r['rank1_share']:.0f}\\% & {r['energy_rank']} & "
-                     f"{r['runner_up']} \\\\")
-    lines += [r"\bottomrule",
-              r"\multicolumn{8}{l}{\footnotesize $^{\ast}$$r(h)$ exceeds $\pm" + f"{band_global:.3f}" + r"$, the largest correlation chance alone produces. s.e.: Newey--West standard error; plain OLS standard errors are in SI Table~\ref{tab:si_topic_band}.}\\",
-              r"\end{tabular}"]
+                     f"[{r['energy_boot_ci'][0]:.2f}, {r['energy_boot_ci'][1]:.2f}] & {r['energy_rank']} \\\\")
+    ba = band.get("band_average", {})
+    if ba:
+        lines.append(r"\midrule")
+        lines.append(f"Mean over the eight & & {ba['energy_mean_over_horizons']:.2f} & & [{ba['energy_mean_ci'][0]:.2f}, {ba['energy_mean_ci'][1]:.2f}] & 1 \\\\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
     (GEN / "pooled_band_table.tex").write_text("\n".join(lines) + "\n")
 
     # ---------- SI: all topics x horizons ----------
@@ -193,7 +206,7 @@ def main() -> None:
     numbers = {"summary": band["summary"], "topic_band": band["topic_band"],
                "by_horizon": [{k: v for k, v in r.items() if k != "ladder"} | {"ladder": r["ladder"]} for r in rows],
                "rL": {h: round(rL[h], 3) for h in H}, "clears": clears, "band_global": round(band_global, 3),
-               "lexical_overlap": lex_summary, "index_constructions": idx}
+               "lexical_overlap": lex_summary, "index_constructions": idx, "band_average": band.get("band_average", {})}
     (PM / "band_numbers.json").write_text(json.dumps(numbers, indent=1) + "\n")
     print("Figure 3, Table 4, SI tables and band_numbers.json written")
     print("lexical:", json.dumps(lex_summary))

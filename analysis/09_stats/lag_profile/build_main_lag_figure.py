@@ -2,8 +2,7 @@
 
 Reads the archived profile in focal_profile_primary.csv and writes the figure
 used by the manuscript. The figure carries only what the text describes: the
-curve, its bootstrap ribbon, the null band, the pre-specified 12-20-week
-window, and two labelled points (the peak and the upper edge of the window).
+curve, its bootstrap ribbon, the null band, the leads at which the correlation exceeds the level chance alone produces, and the labelled peak.
 Correlations and the band are printed to three decimals because r(20) = 0.354
 and the band 0.346 both round to 0.35.
 
@@ -50,11 +49,6 @@ def main() -> None:
     })
     fig, ax = plt.subplots(figsize=(9.2, 4.4))
 
-    # the pre-specified theory window
-    ax.axvspan(12, 20, color=WINDOW, alpha=0.16, zorder=0, lw=0)
-    ax.text(16, 0.665, "agenda-setting window\n12–20 weeks", ha="center", va="top",
-            fontsize=8, color="#8a6d3b")
-
     # what chance alone produces anywhere in the scan
     ax.axhspan(-band, band, color="#d9d9d9", alpha=0.30, zorder=0, lw=0)
     for sign in (1, -1):
@@ -78,9 +72,6 @@ def main() -> None:
     ax.text(27.2, r[26] + 0.02,
             f"peak: L = 26 weeks, r = {r[26]:.3f}\n95% interval [{lo[26]:.2f}, {hi[26]:.2f}]",
             ha="left", va="bottom", fontsize=8, color="#1a1a1a", zorder=5)
-    ax.plot([20], [r[20]], "o", color=LINE, ms=4.5, zorder=4)
-    ax.text(19.5, r[20] - 0.06, f"r(20) = {r[20]:.3f}", ha="center", va="top",
-            fontsize=8, color="#1a1a1a", zorder=5)
 
     # direction of the lead, spelled out at the two ends of the axis
     ax.text(-25, -0.265, "← search interest leads coverage", ha="left", va="center",
