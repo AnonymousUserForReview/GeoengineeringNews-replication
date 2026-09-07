@@ -1,5 +1,9 @@
 """Influence diagnostics at every horizon from 19 to 26 weeks, and Figure 2.
 
+Figure 2 shows the change in the correlation relative to the full sample, so that the
+size of each period's contribution is read directly rather than inferred from whether
+the remaining correlation happens to fall below the level chance alone produces.
+
 For each lead L in 19..26 the correlation between climate coverage (m_climate_clean_pooled_z)
 and the search index (idx_cleaned_weighted) is re-estimated after removing every pair of
 weeks with either endpoint in an excluded window: each calendar quarter, each calendar
@@ -85,52 +89,53 @@ def main() -> None:
     assert worst < 1e-6, f"L=26 mismatch vs influence.csv: {worst}"
     print(f"L = 26 reproduces influence.csv (max abs diff {worst:.2e}); band ±{band:.3f}")
 
-    # ---------------- Figure 2: two panels of r(h) after exclusion, horizons as rows
+    # ---------------- Figure 2: change in r(h) when one period is left out
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9,
                          "axes.spines.top": False, "axes.spines.right": False})
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(13.0, 5.4), gridspec_kw={"width_ratios": [20, 6.5]})
     base = {L: df[(df.L == L) & (df.exclusion == "none (full sample)")]["r"].iloc[0] for L in HORIZONS}
-    norm = TwoSlopeNorm(vmin=0.0, vcenter=band, vmax=0.6)
+    lim = 0.35
     cmap = plt.get_cmap("RdBu")
 
     def panel(axis, labels, title, xlabels):
-        mat = np.array([[df[(df.L == L) & (df.exclusion == lab)]["r"].iloc[0] for lab in labels] for L in HORIZONS])
-        axis.imshow(mat, cmap=cmap, norm=norm, aspect="auto")
-        for i, L in enumerate(HORIZONS):
+        mat = np.array([[df[(df.L == L) & (df.exclusion == lab)]["r"].iloc[0] - base[L] for lab in labels]
+                        for L in HORIZONS])
+        im = axis.imshow(mat, cmap=cmap, vmin=-lim, vmax=lim, aspect="auto")
+        for i in range(len(HORIZONS)):
             for j in range(len(labels)):
                 v = mat[i, j]
-                axis.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7.2,
-                          color="white" if (v < 0.22 or v > 0.5) else "black",
-                          fontweight="bold" if v < band else "normal")
+                axis.text(j, i, f"{v:+.2f}".replace("+0.", "+.").replace("-0.", "\u2212."),
+                          ha="center", va="center", fontsize=7.2,
+                          color="white" if abs(v) > 0.22 else "black")
         axis.set_yticks(range(len(HORIZONS)))
         axis.set_yticklabels([f"h = {L}" for L in HORIZONS])
         axis.set_xticks(range(len(labels)))
         axis.set_xticklabels(xlabels, rotation=90, fontsize=8)
         axis.set_title(title, loc="left", fontweight="bold")
-        for s in axis.spines.values():
-            s.set_visible(False)
-        return mat
+        for sp in axis.spines.values():
+            sp.set_visible(False)
+        return mat, im
 
     qlabels = [f"drop {q}" for q in quarters]
-    matA = panel(ax, qlabels, "A. Correlation after leaving out one quarter, at each horizon",
-                 [q + ("*" if q in MEDIA_Q else "\u2020" if q in SEARCH_Q else "") for q in quarters])
-    matB = panel(bx, periods, "B. Leaving out a whole year",
-                 ["2018", "2019", "2020 (COVID)", "2021", "2022", "Jul–Dec 2021"])
-    fig.subplots_adjust(left=0.06, right=0.99, top=0.9, bottom=0.17, wspace=0.28)
+    matA, im = panel(ax, qlabels, "A. Change when one quarter is left out",
+                     [q + ("*" if q in MEDIA_Q else "\u2020" if q in SEARCH_Q else "") for q in quarters])
+    matB, _ = panel(bx, periods, "B. Change when a whole year is left out",
+                    ["2018", "2019", "2020 (COVID)", "2021", "2022", "Jul\u2013Dec 2021"])
+    fig.subplots_adjust(left=0.06, right=0.90, top=0.9, bottom=0.17, wspace=0.28)
+    cax = fig.add_axes([0.925, 0.17, 0.015, 0.73])
+    cb = fig.colorbar(im, cax=cax)
+    cb.set_label("Change in the correlation when that period is left out\n(red: the correlation falls; blue: it rises)", fontsize=8)
+    cb.ax.tick_params(labelsize=8)
     fig.savefig(GRAPHS / "fig_influence_main.pdf")
     fig.savefig(GRAPHS / "fig_influence_main.png", dpi=300)
     plt.close(fig)
-    below_A = int((matA < band).sum()); below_B = int((matB < band).sum())
-    print(f"cells below {band:.3f}: quarters {below_A} of {matA.size}; periods {below_B} of {matB.size}")
-    # which quarters push any horizon below the level
-    hits = {}
-    for j, q in enumerate(quarters):
-        hs = [HORIZONS[i] for i in range(len(HORIZONS)) if matA[i, j] < band]
-        if hs: hits[q] = hs
-    print("quarters whose removal pushes r(h) below the level, by horizon:", hits)
+    print(f"largest drop: quarters {matA.min():+.3f}; periods {matB.min():+.3f}; largest rise {max(matA.max(), matB.max()):+.3f}")
+    order = sorted(range(len(quarters)), key=lambda j: matA[:, j].mean())
+    print("quarters by mean change across the eight horizons:")
+    for j in order[:5]:
+        print(f"  {quarters[j]}: mean {matA[:, j].mean():+.3f}, most negative {matA[:, j].min():+.3f}")
     for j, p in enumerate(periods):
-        hs = [HORIZONS[i] for i in range(len(HORIZONS)) if matB[i, j] < band]
-        print(f"  {p}: below at {hs}")
+        print(f"  {p}: change from {matB[:, j].min():+.3f} to {matB[:, j].max():+.3f}")
 
 
 if __name__ == "__main__":
