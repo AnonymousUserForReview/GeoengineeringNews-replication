@@ -108,7 +108,7 @@ def main() -> None:
                           ha="center", va="center", fontsize=7.2,
                           color="white" if abs(v) > 0.22 else "black")
         axis.set_yticks(range(len(HORIZONS)))
-        axis.set_yticklabels([f"h = {L}" for L in HORIZONS])
+        axis.set_yticklabels([f"L = {L}" for L in HORIZONS])
         axis.set_xticks(range(len(labels)))
         axis.set_xticklabels(xlabels, rotation=90, fontsize=8)
         axis.set_title(title, loc="left", fontweight="bold")

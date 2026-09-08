@@ -62,14 +62,14 @@ def main() -> None:
     ax.axhline(band["summary"]["energy_b_mean"], color="#d95f02", lw=0.9, ls=(0, (4, 3)), zorder=1)
     ax.text(23.5, band["summary"]["energy_b_mean"] + 0.06, f"mean {band['summary']['energy_b_mean']:.2f}",
             ha="center", va="bottom", fontsize=8, color="#b34700")
-    ax.text(19.5, -1.55, "shaded: horizons circled in Figure 1 (r above 0.346)",
+    ax.text(19.5, -1.55, "shaded: leads circled in Figure 1 (r above 0.346)",
             ha="left", va="center", fontsize=7.5, color="#4C78A8")
     ax.set_xticks(H)
     ax.set_xlim(18.4, 26.6)
     ax.set_ylim(-1.8, 4.2)
-    ax.set_xlabel("Horizon h (weeks between coverage and search interest)")
+    ax.set_xlabel("Lead L (weeks between coverage and search interest)")
     ax.set_ylabel("Index points per one-SD rise in energy coverage")
-    ax.set_title("A. Energy coefficient at each horizon, 19 to 26 weeks", loc="left", fontweight="bold")
+    ax.set_title("A. Energy coefficient at each lead, 19 to 26 weeks", loc="left", fontweight="bold")
 
     tb = band["topic_band"]
     order = sorted(CATS, key=lambda c: -tb[c]["mean"])
@@ -86,8 +86,8 @@ def main() -> None:
     bx.set_yticks(ys)
     bx.set_yticklabels([c.capitalize() for c in order])
     bx.set_xlim(-1.6, 3.6)
-    bx.set_xlabel("Mean over the eight horizons (dot) and range across them (line)")
-    bx.set_title("B. All twelve topics over the same horizons", loc="left", fontweight="bold")
+    bx.set_xlabel("Mean over the eight leads (dot) and range across them (line)")
+    bx.set_title("B. All twelve topics over the same leads", loc="left", fontweight="bold")
     fig.tight_layout()
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.pdf")
     fig.savefig(GRAPHS / "fig_topic_coefficients_main.png", dpi=300)
@@ -97,7 +97,7 @@ def main() -> None:
     def p(x):
         return "$<$.0001" if x < 1e-4 else f"{x:.3f}".lstrip("0")
     lines = [r"\begin{tabular}{lccccc}", r"\toprule",
-             r"Horizon $h$ & $r(h)$ & Energy coefficient & s.e. & Range on resampled weeks & Rank of energy \\",
+             r"Lead $L$ & $r(L)$ & Energy coefficient & s.e. & Range on resampled weeks & Rank of energy \\",
              r"\midrule"]
     for r in rows:
         star = r"$^{\ast}$" if clears[r["h"]] else ""
@@ -113,7 +113,7 @@ def main() -> None:
     # ---------- SI: all topics x horizons ----------
     co = band["coefficients"]
     lines = [r"\begin{tabular}{l" + "c" * len(H) + "}", r"\toprule",
-             "Topic & " + " & ".join(f"$h={h}$" for h in H) + r" \\", r"\midrule"]
+             "Topic & " + " & ".join(f"$L={h}$" for h in H) + r" \\", r"\midrule"]
     for c in order:
         cells = []
         for h in H:
@@ -147,7 +147,7 @@ def main() -> None:
 
     # ---------- SI: ladder by horizon ----------
     lines = [r"\begin{tabular}{lcccccccc}", r"\toprule",
-             "& " + " & ".join(f"$h={h}$" for h in H) + r" \\", r"\midrule"]
+             "& " + " & ".join(f"$L={h}$" for h in H) + r" \\", r"\midrule"]
     for key, name in (("baseline", "Baseline adj.\\ $R^2$"), ("volume", "+ topic volume"), ("tone", "+ topic tone"), ("interactions", "+ interactions")):
         lines.append(f"{name} & " + " & ".join(f"{r['ladder'][key]['adjR2']:.3f}" for r in rows) + r" \\")
     lines.append(r"\midrule")
@@ -174,7 +174,7 @@ def main() -> None:
         idx[h] = {"first": r.get("energy_first_ranked_in"), "n": len(cons), "sig05": sum(c.get("energy_p", 1) < 0.05 for c in cons)}
     # ---------- SI: vocabulary-overlap test by horizon ----------
     lines = [r"\begin{tabular}{l" + "c" * len(H) + "}", r"\toprule",
-             "Index variant & " + " & ".join(f"$h={h}$" for h in H) + r" \\", r"\midrule"]
+             "Index variant & " + " & ".join(f"$L={h}$" for h in H) + r" \\", r"\midrule"]
     for name, v in lex["variants"].items():
         cells = []
         for h in H:

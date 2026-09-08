@@ -168,11 +168,11 @@ def main() -> None:
     rmse_axis.text(18.55, 0.06, "worse", ha="left", va="bottom", fontsize=7.5, color="#555555")
     rmse_axis.text(18.55, -0.06, "better", ha="left", va="top", fontsize=7.5, color="#555555")
     inside = sum(lo <= r <= hi for r, lo, hi in zip(real, fake_lo, fake_hi))
-    rmse_axis.text(0.5, 0.97, f"the real tone series falls inside the no-information range\nat {inside} of the 8 horizons",
+    rmse_axis.text(0.5, 0.97, f"the real tone series falls inside the no-information range\nat {inside} of the 8 leads",
                    transform=rmse_axis.transAxes, ha="center", va="top", fontsize=8, color="#333333")
     rmse_axis.set_xticks(H)
     rmse_axis.set_xlim(18.4, 26.6)
-    rmse_axis.set_xlabel("Horizon h (weeks)")
+    rmse_axis.set_xlabel("Lead L (weeks)")
     rmse_axis.set_ylabel("Change in prediction error when tone is added\n(index points; above zero = worse predictions)")
     rmse_axis.legend(frameon=False, fontsize=7.5, loc="lower center", bbox_to_anchor=(0.5, -0.30))
     rmse_axis.set_title(
