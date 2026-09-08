@@ -82,6 +82,16 @@ STAGES = [
         "Table 4 and the RQ2/RQ3 inferential results; Figure 4; SI horizon figure",
     ),
     (
+        "ml",
+        ["analysis/09_stats/ml_shap/run_ml_shap.py"],
+        [
+            "analysis/08_rebuild/weekly_series_master.csv",
+            "data/07_weekly_series/weekly_topic_salience_by_category.csv",
+            "data/07_weekly_series/weekly_topic_sentiment_by_category.csv",
+        ],
+        "exploratory predictive models and SHAP attributions (SI S9); not used by any main-text claim",
+    ),
+    (
         "tone",
         [
             "analysis/10_volume_vs_tone/run.py",

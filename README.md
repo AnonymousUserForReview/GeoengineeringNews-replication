@@ -25,20 +25,21 @@ nothing fails silently. Individual stages: `python run_all.py --stages pooled,to
 |---|---|---|
 | `rebuild` | weekly media-coverage variants and all index constructions (`analysis/08_rebuild/weekly_series_master.csv`) | Methods measures |
 | `lag_profile` | correlation between coverage and search interest at every lead, the level chance alone produces (max-statistic null), influence diagnostics at the peak lead, leave-one-token-out family, 16-combination variant table | RQ1; SI S4, S11 |
-| `lag_figures` | Figure 1 (correlation at each lead, leads above the chance level circled); Figure 2 (change in the correlation when each quarter or year is left out, at every horizon 19 to 26, `run_influence_by_horizon.py`); SI two-panel comparisons | Figures 1 and 2; SI figures |
+| `lag_figures` | Figure 1 (correlation at each lead, leads above the chance level circled); Figure 2 (change in the correlation when each quarter or year is left out, at every lead 19 to 26, `run_influence_by_horizon.py`); SI two-panel comparisons | Figures 1 and 2; SI figures |
 | `adl` | dynamic (ADL) models, cumulative and long-run multipliers, event terms, Granger diagnostics | RQ1 closing paragraph; SI S4 |
-| `pooled` | pooled topic model at h in {12,16,20,25,26} and at every horizon 19 to 26 (`run_horizon_band.py`: HAC and OLS errors, block bootstrap, the across-horizon mean with jointly resampled weeks, tone interactions, prediction ladder and shifted-tone benchmark at every horizon); per-topic FDR table; SI horizon figure | RQ2, RQ3; Table 2; SI S8, S10, S11 |
+| `pooled` | pooled topic model at L in {12,16,20,25,26} and at every lead 19 to 26 (`run_horizon_band.py`: HAC and OLS errors, block bootstrap, the across-lead mean with jointly resampled weeks, tone interactions, prediction ladder and shifted-tone benchmark at every lead); per-topic FDR table; SI lead figure | RQ2, RQ3; Table 2; SI S8, S10, S11 |
+| `ml` | exploratory predictive models (Linear, XGBoost) against train-mean, persistence and seasonal-naive baselines, with SHAP attributions | SI S9 Table (Linear and XGBoost columns). The Random Forest and CatBoost values quoted in the S9 text come from a separate leakage-check script that is not part of this package. No main-text claim rests on any of these models. |
 | `tone` | tone-split correlation curves, permutation tests, archived tone scores reused | Figure 4A; SI S10 |
 | `cross_retrieval` | stability of every search-term series across separate downloads | SI S3 |
 | `coverage_sensitivity` | news-token retention-rule sensitivity | SI S11 |
-| `lexical_overlap` | energy result with energy-related search terms removed from the index, at every horizon 19 to 26 | RQ2 footnote; SI lexical table |
-| `unambiguous` | unambiguous-term index, seven-construction ranking at every horizon 19 to 26, per-construction verdict table | RQ1 footnote; RQ2; SI table |
+| `lexical_overlap` | energy result with energy-related search terms removed from the index, at every lead 19 to 26 | RQ2 footnote; SI lexical table |
+| `unambiguous` | unambiguous-term index, seven-construction ranking at every lead 19 to 26, per-construction verdict table | RQ1 footnote; RQ2; SI table |
 | `tables` | SI token-audit LaTeX table | SI S2 |
-| `band_outputs` | Figure 3 (energy at each horizon; all twelve topics over the horizons), Table 2 (`generated/pooled_band_table.tex`), the SI band tables, and Figure 4 with panel B (change in prediction error when tone is added, real tone against tone shifted in time) | Figures 3 and 4, Table 2; SI S10 tables |
+| `band_outputs` | Figure 3 (energy at each lead; all twelve topics over the leads), Table 2 (`generated/pooled_band_table.tex`), the SI band tables, and Figure 4 with panel B (change in prediction error when tone is added, real tone against tone shifted in time) | Figures 3 and 4, Table 2; SI S10 tables |
 
 Every script sets explicit random seeds; `--verify` compares the regenerated
 headline numbers (energy coefficient and bootstrap CI at h = 25, the counts
-across the horizons 19 to 26, peak correlation and chance level, verdict
+across the leads 19 to 26, peak correlation and chance level, verdict
 counts) against `expected_values.json` with tolerances that absorb
 platform-level floating-point differences.
 
