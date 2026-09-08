@@ -32,7 +32,7 @@ nothing fails silently. Individual stages: `python run_all.py --stages pooled,to
 | `cross_retrieval` | stability of every search-term series across separate downloads | SI S3 |
 | `coverage_sensitivity` | news-token retention-rule sensitivity | SI S11 |
 | `lexical_overlap` | energy result with energy-related search terms removed from the index, at every horizon 19 to 26 | RQ2 footnote; SI lexical table |
-| `unambiguous` | unambiguous-term index, seven-construction ranking at every horizon 19 to 26, per-construction verdict table | Robustness and scope; SI table |
+| `unambiguous` | unambiguous-term index, seven-construction ranking at every horizon 19 to 26, per-construction verdict table | RQ1 footnote; RQ2; SI table |
 | `tables` | SI token-audit LaTeX table | SI S2 |
 | `band_outputs` | Figure 3 (energy at each horizon; all twelve topics over the horizons), Table 2 (`generated/pooled_band_table.tex`), the SI band tables, and Figure 4 with panel B (change in prediction error when tone is added, real tone against tone shifted in time) | Figures 3 and 4, Table 2; SI S10 tables |
 
