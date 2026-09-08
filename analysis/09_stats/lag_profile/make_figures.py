@@ -64,7 +64,7 @@ for ax, name in zip(axes, ["original", "primary"]):
         ax.annotate(f"r({L}) = {r:.2f}", (L, r), xytext=xy, ha=ha,
                     fontsize = 8, color=INK,
                     arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.6))
-    ax.text(24.4, -0.33, "h = 25\n(featured pooled-\nmodel horizon)", fontsize=7.5,
+    ax.text(24.4, -0.33, "L = 25\n(featured pooled-\nmodel lead)", fontsize=7.5,
             color=ORANGE, ha="right", va="bottom")
     ax.text(16, 0.705, "McCombs\n12–20 wk", fontsize=7.5, color=MUTED,
             ha="center", va="top")
@@ -78,7 +78,7 @@ for ax, name in zip(axes, ["original", "primary"]):
     style(ax)
 axes[0].legend(loc="upper left", bbox_to_anchor=(0.0, 1.0), frameon=False,
                fontsize=8, handlelength=1.6)
-axes[1].set_xlabel("Lag L (weeks; positive = media leads search interest)")
+axes[1].set_xlabel("Lead L (weeks; positive = coverage leads search interest)")
 axes[1].set_xticks(np.arange(-26, 53, 13))
 fig.tight_layout()
 fig.savefig(f"{OUT}/fig_lag_profile.png", dpi=300)
@@ -118,10 +118,10 @@ for ax, name in zip(axes, ["original", "primary"]):
     ax.set_yticklabels(order, fontsize=8)
     ax.set_ylim(-1, len(order) + 2.4)
     ax.set_xlim(0.0, 0.62)
-    ax.set_xlabel(f"r at peak lag L = {Lpk} under exclusion")
+    ax.set_xlabel(f"r at peak lead L = {Lpk} under exclusion")
     ax.set_title(short[name], fontsize=9.5, loc="left", color=INK, pad=6)
     style(ax)
-fig.suptitle("Influence diagnostics: peak-lag correlation under sample exclusions "
+fig.suptitle("Influence diagnostics: peak-lead correlation under sample exclusions "
              "(pairs dropped if either endpoint falls in window)",
              fontsize=10, x=0.02, ha="left", color=INK)
 fig.tight_layout(rect=(0, 0, 1, 0.965))

@@ -137,7 +137,7 @@ def main() -> None:
     )
     difference_axis.set_ylim(-0.22, 0.17)
     difference_axis.set_ylabel(r"$\Delta r(L)$")
-    difference_axis.set_xlabel("Lead L (weeks; positive = media leads search)")
+    difference_axis.set_xlabel("Lead L (weeks; positive = coverage leads search interest)")
     difference_axis.text(
         0.01,
         0.95,

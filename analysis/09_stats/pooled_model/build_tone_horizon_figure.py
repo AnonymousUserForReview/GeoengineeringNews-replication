@@ -61,12 +61,12 @@ def main() -> None:
                     capsize=3.5, markersize=5, lw=1.4, label=label, zorder=3)
 
     ax.set_xticks(positions)
-    ax.set_xticklabels([f"h = {h}" for h in HORIZONS])
-    ax.set_xlabel("Forecast horizon (weeks)")
+    ax.set_xticklabels([f"L = {h}" for h in HORIZONS])
+    ax.set_xlabel("Lead L (weeks)")
     ax.set_ylabel(r"Energy $\times$ tone coefficient $\hat\theta_1$")
     ax.legend(frameon=False, fontsize=8, loc="upper left")
     ax.text(0.995, 0.02,
-            "Moving-block bootstrap 95% intervals (block length = max(h, 25))",
+            "Moving-block bootstrap 95% intervals (block length = max(L, 25))",
             transform=ax.transAxes, ha="right", va="bottom",
             fontsize=7.5, color="#666666")
 
